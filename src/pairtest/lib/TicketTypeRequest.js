@@ -18,6 +18,8 @@ export default class TicketTypeRequest {
 
     this.#type = type;
     this.#noOfTickets = noOfTickets;
+
+    Object.freeze(this);
   }
 
   getNoOfTickets() {
