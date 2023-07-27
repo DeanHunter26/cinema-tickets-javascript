@@ -12,6 +12,12 @@ export default class TicketService {
     }
   } 
 
+  #isTicketTypeRequests(ticketTypeRequests) {
+    if(ticketTypeRequests.length < 1) {
+      throw new RangeError('no tickets provided');
+    }
+  }
+
 
 
   /**
@@ -21,5 +27,6 @@ export default class TicketService {
   purchaseTickets(accountId, ...ticketTypeRequests) {
     // throws InvalidPurchaseException
     this.#isValidAccountId(accountId);
+    this.#isTicketTypeRequests(ticketTypeRequests);
   }
 }

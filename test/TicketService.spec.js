@@ -29,5 +29,12 @@ describe('TicketService class', () => {
                 expect(() => {ticketService.purchaseTickets(0, ticketTypeRequest)}).toThrow(errorDescription);
             });
         });
+        describe('isTicketTypeRequests', () => {
+            it('should throw a range error when below 1', () => {
+                const ticketService = new TicketService();
+                const errorDescription = 'no tickets provided';
+                expect(() => {ticketService.purchaseTickets(123)}).toThrow(errorDescription);
+            });
+        });
     });
 });
