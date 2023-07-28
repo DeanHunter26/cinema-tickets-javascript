@@ -28,16 +28,16 @@ export default class TicketService {
   }
 
   #groupAndCountTickets(ticketTypeRequests) {
-    const ticketCounts = new Map();
+    const ticketTypeCounts = new Map();
 
     for(const request of ticketTypeRequests) {
       const type = request.getTicketType();
       const noOfTickets = request.getNoOfTickets();
 
-      ticketCounts.set(type, (ticketCounts.get(type) || 0) + noOfTickets);
+      ticketTypeCounts.set(type, (ticketTypeCounts.get(type) || 0) + noOfTickets);
     }
 
-    return ticketCounts;
+    return ticketTypeCounts;
   }
 
   /**
@@ -49,7 +49,7 @@ export default class TicketService {
     this.#validateAccountId(accountId);
     this.#validateTicketTypeRequests(ticketTypeRequests);
 
-    const ticketCounts = this.#groupAndCountTickets(ticketTypeRequests);
+    const ticketTypeCounts = this.#groupAndCountTickets(ticketTypeRequests);
    // this.#validateTickets();
   }
 }

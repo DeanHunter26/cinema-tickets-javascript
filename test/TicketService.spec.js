@@ -11,7 +11,7 @@ describe('TicketService', () => {
     describe('purchaseTickets', () => {
         const typeRequest = new TicketTypeRequest('ADULT', 1);
 
-        describe('isValidAccountId', () => {
+        describe('validateAccountId', () => {
             const INVALID_ACCOUNT_ID_ERROR = 'Invalid account ID. Account ID must be a positive integer.';
 
             it('should throw a type error when accountId is undefined', () => {
@@ -31,7 +31,7 @@ describe('TicketService', () => {
             });
         });
 
-        describe('isTicketTypeRequests', () => {
+        describe('validateTicketTypeRequests', () => {
           const NO_TICKETS_PROVIDED_ERROR = 'No tickets, provided. Please provide at least one ticket type request.';
           const INVALID_TICKET_TYPE_REQUESTS_ERROR = 'Invalid ticket type requests. All items in the ticketTypeRequsts array must be instances of TicketTypeRequest.';
     
