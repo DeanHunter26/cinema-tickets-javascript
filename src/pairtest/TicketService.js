@@ -67,9 +67,9 @@ export default class TicketService {
   }
 
   #validateAdultswithChildOrInfant(ticketTypeCounts) {
-    const adultCount = ticketTypeCounts.get("ADULT") || 0;
-    const childCount = ticketTypeCounts.get("CHILD") || 0;
-    const infantCount = ticketTypeCounts.get("INFANT") || 0;
+    const adultCount = this.#getTicketTypeCount(ticketTypeCounts, "ADULT");
+    const childCount = this.#getTicketTypeCount(ticketTypeCounts, "CHILD");
+    const infantCount = this.#getTicketTypeCount(ticketTypeCounts, "INFANT");
 
     if ((childCount > 0 || infantCount > 0) && adultCount === 0) {
       throw new InvalidPurchaseException(ERROR_MESSAGES.INSUFFICIENT_ADULTS);
@@ -77,14 +77,18 @@ export default class TicketService {
   }
 
   #validateAdultsVsInfants(ticketTypeCounts) {
-    const adultCount = ticketTypeCounts.get("ADULT") || 0;
-    const infantCount = ticketTypeCounts.get("INFANT") || 0;
+    const adultCount = this.#getTicketTypeCount(ticketTypeCounts, "ADULT");
+    const infantCount = this.#getTicketTypeCount(ticketTypeCounts, "INFANT");
 
     if (adultCount < infantCount) {
       throw new InvalidPurchaseException(
         ERROR_MESSAGES.ADULTS_LESS_THAN_INFANTS
       );
     }
+  }
+
+  #getTicketTypeCount(ticketTypeCounts, ticketType) {
+    return ticketTypeCounts.get(ticketType) || 0;
   }
 
   /**
