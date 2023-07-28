@@ -81,6 +81,22 @@ describe("TicketService", () => {
       });
     });
 
+    describe("validateAdultswithChildOrInfant", () => {
+      const INSUFFICIENT_ADULTS =
+        "There must be at least one adult for child or infant tickets.";
+
+      it("should throw an error when there is no adult but children or infants", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("CHILD", 9),
+          new TicketTypeRequest("INFANT", 9),
+        ];
+
+        expect(() =>
+          ticketService.purchaseTickets(123, ...ticketTypeRequests)
+        ).toThrow(INSUFFICIENT_ADULTS);
+      });
+    });
+
     describe("validateAdultsVsInfants", () => {
       const ADULTS_LESS_THAN_INFANTS =
         "Number of adults must be greater than or equal to the number of infants.";

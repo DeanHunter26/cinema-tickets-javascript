@@ -13,6 +13,8 @@ const ERROR_MESSAGES = {
   MAX_TICKETS_EXCEEDED: "Number of tickets cannot exceed 20.",
   ADULTS_LESS_THAN_INFANTS:
     "Number of adults must be greater than or equal to the number of infants.",
+  INSUFFICIENT_ADULTS:
+    "There must be at least one adult for child or infant tickets.",
 };
 
 export default class TicketService {
@@ -64,11 +66,21 @@ export default class TicketService {
     }
   }
 
-  #validateAdultsVsInfants(ticketTypeCounts) {
-    const adultsCount = ticketTypeCounts.get("ADULT") || 0;
-    const infantsCount = ticketTypeCounts.get("INFANT") || 0;
+  #validateAdultswithChildOrInfant(ticketTypeCounts) {
+    const adultCount = ticketTypeCounts.get("ADULT") || 0;
+    const childCount = ticketTypeCounts.get("CHILD") || 0;
+    const infantCount = ticketTypeCounts.get("INFANT") || 0;
 
-    if (adultsCount < infantsCount) {
+    if ((childCount > 0 || infantCount > 0) && adultCount === 0) {
+      throw new InvalidPurchaseException(ERROR_MESSAGES.INSUFFICIENT_ADULTS);
+    }
+  }
+
+  #validateAdultsVsInfants(ticketTypeCounts) {
+    const adultCount = ticketTypeCounts.get("ADULT") || 0;
+    const infantCount = ticketTypeCounts.get("INFANT") || 0;
+
+    if (adultCount < infantCount) {
       throw new InvalidPurchaseException(
         ERROR_MESSAGES.ADULTS_LESS_THAN_INFANTS
       );
@@ -86,6 +98,7 @@ export default class TicketService {
 
     const ticketTypeCounts = this.#groupAndCountTickets(ticketTypeRequests);
     this.#validateMaxTickets(ticketTypeCounts);
+    this.#validateAdultswithChildOrInfant(ticketTypeCounts);
     this.#validateAdultsVsInfants(ticketTypeCounts);
   }
 }
