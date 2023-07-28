@@ -11,6 +11,8 @@ const ERROR_MESSAGES = {
   TICKET_VALIDATION_FAILED:
     "Ticket validation failed. One or more tickets are invalid.",
   MAX_TICKETS_EXCEEDED: "Number of tickets cannot exceed 20.",
+  ADULTS_LESS_THAN_INFANTS:
+    "Number of adults must be greater than or equal to the number of infants.",
 };
 
 export default class TicketService {
@@ -62,6 +64,17 @@ export default class TicketService {
     }
   }
 
+  #validateAdultsVsInfants(ticketTypeCounts) {
+    const adultsCount = ticketTypeCounts.get("ADULT") || 0;
+    const infantsCount = ticketTypeCounts.get("INFANT") || 0;
+
+    if (adultsCount < infantsCount) {
+      throw new InvalidPurchaseException(
+        ERROR_MESSAGES.ADULTS_LESS_THAN_INFANTS
+      );
+    }
+  }
+
   /**
    * Should only have private methods other than the one below.
    */
@@ -73,5 +86,6 @@ export default class TicketService {
 
     const ticketTypeCounts = this.#groupAndCountTickets(ticketTypeRequests);
     this.#validateMaxTickets(ticketTypeCounts);
+    this.#validateAdultsVsInfants(ticketTypeCounts);
   }
 }

@@ -80,5 +80,21 @@ describe("TicketService", () => {
         ).toThrow(MAX_TICKETS_EXCEEDED);
       });
     });
+
+    describe("validateAdultsVsInfants", () => {
+      const ADULTS_LESS_THAN_INFANTS =
+        "Number of adults must be greater than or equal to the number of infants.";
+
+      it("should throw an error when there is more infants than adults", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("ADULT", 8),
+          new TicketTypeRequest("INFANT", 9),
+        ];
+
+        expect(() =>
+          ticketService.purchaseTickets(123, ...ticketTypeRequests)
+        ).toThrow(ADULTS_LESS_THAN_INFANTS);
+      });
+    });
   });
 });
