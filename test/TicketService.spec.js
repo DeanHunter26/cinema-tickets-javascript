@@ -1,10 +1,14 @@
 import TicketService from "../src/pairtest/TicketService";
 import TicketTypeRequest from "../src/pairtest/lib/TicketTypeRequest";
+import TicketPaymentService from "../src/thirdparty/paymentgateway/TicketPaymentService";
+
+jest.mock("../src/thirdparty/paymentgateway/TicketPaymentService");
 
 describe("TicketService", () => {
   let ticketService;
 
-  beforeEach(() => {
+  beforeAll(() => {
+    TicketPaymentService.mockClear();
     ticketService = new TicketService();
   });
 
@@ -111,6 +115,21 @@ describe("TicketService", () => {
           ticketService.purchaseTickets(123, ...ticketTypeRequests)
         ).toThrow(ADULTS_LESS_THAN_INFANTS);
       });
+    });
+
+    it("should call makePayment from TicketPaymentService with correct accountId and total ticket cost", () => {
+      const ticketTypeRequests = [
+        new TicketTypeRequest("ADULT", 2),
+        new TicketTypeRequest("CHILD", 3),
+        new TicketTypeRequest("INFANT", 1),
+      ];
+
+      ticketService.purchaseTickets(123, ...ticketTypeRequests);
+
+      const mockMakePayment =
+        TicketPaymentService.mock.instances[0].makePayment;
+      expect(mockMakePayment).toHaveBeenCalledTimes(1);
+      expect(mockMakePayment).toHaveBeenCalledWith(123, 70);
     });
   });
 });
