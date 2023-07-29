@@ -3,43 +3,27 @@ import InvalidPurchaseException from "./lib/InvalidPurchaseException.js";
 import TicketPaymentService from "../thirdparty/paymentgateway/TicketPaymentService.js";
 import SeatReservationService from "../thirdparty/seatbooking/SeatReservationService.js";
 
-const ERROR_MESSAGES = {
-  INVALID_ACCOUNT_ID:
-    "Invalid account ID. Account ID must be a positive integer.",
-  NO_TICKETS_PROVIDED:
-    "No tickets, provided. Please provide at least one ticket type request.",
-  INVALID_TICKET_TYPE_REQUESTS:
-    "Invalid ticket type requests. All items in the ticketTypeRequsts array must be instances of TicketTypeRequest.",
-  TICKET_VALIDATION_FAILED:
-    "Ticket validation failed. One or more tickets are invalid.",
-  MAX_TICKETS_EXCEEDED: "Number of tickets cannot exceed 20.",
-  ADULTS_LESS_THAN_INFANTS:
-    "Number of adults must be greater than or equal to the number of infants.",
-  INSUFFICIENT_ADULTS:
-    "There must be at least one adult for child or infant tickets.",
-};
-
-const TICKET_PRICES = {
-  ADULT: 20,
-  CHILD: 10,
-  INFANT: 0,
-};
-
 export default class TicketService {
   #validateAccountId(accountId) {
     if (!Number.isInteger(accountId) || accountId < 1) {
-      throw new TypeError(ERROR_MESSAGES.INVALID_ACCOUNT_ID);
+      throw new InvalidPurchaseException(
+        "Invalid account ID. Account ID must be a positive integer."
+      );
     }
   }
 
   #validateTicketTypeRequests(ticketTypeRequests) {
     if (ticketTypeRequests.length === 0) {
-      throw new RangeError(ERROR_MESSAGES.NO_TICKETS_PROVIDED);
+      throw new InvalidPurchaseException(
+        "No tickets, provided. Please provide at least one ticket type request."
+      );
     }
 
     for (const request of ticketTypeRequests) {
       if (!(request instanceof TicketTypeRequest)) {
-        throw new TypeError(ERROR_MESSAGES.INVALID_TICKET_TYPE_REQUESTS);
+        throw new InvalidPurchaseException(
+          "Invalid ticket type requests. All items in the ticketTypeRequsts array must be instances of TicketTypeRequest."
+        );
       }
     }
   }
@@ -70,7 +54,7 @@ export default class TicketService {
     const maxTickets = 20;
 
     if (totalTickets > maxTickets) {
-      throw new InvalidPurchaseException(ERROR_MESSAGES.MAX_TICKETS_EXCEEDED);
+      throw new InvalidPurchaseException("Number of tickets cannot exceed 20.");
     }
   }
 
@@ -80,7 +64,9 @@ export default class TicketService {
     const infantCount = this.#getTicketTypeCount(ticketTypeCounts, "INFANT");
 
     if ((childCount > 0 || infantCount > 0) && adultCount === 0) {
-      throw new InvalidPurchaseException(ERROR_MESSAGES.INSUFFICIENT_ADULTS);
+      throw new InvalidPurchaseException(
+        "There must be at least one adult for child or infant tickets."
+      );
     }
   }
 
@@ -90,7 +76,7 @@ export default class TicketService {
 
     if (adultCount < infantCount) {
       throw new InvalidPurchaseException(
-        ERROR_MESSAGES.ADULTS_LESS_THAN_INFANTS
+        "Number of adults must be greater than or equal to the number of infants."
       );
     }
   }
@@ -100,14 +86,21 @@ export default class TicketService {
   }
 
   #calculateTotalTicketCost(ticketTypeCounts) {
+    const ticketPrices = {
+      adult: 20,
+      child: 10,
+      infant: 0,
+    };
     const adultCount = this.#getTicketTypeCount(ticketTypeCounts, "ADULT");
     const childCount = this.#getTicketTypeCount(ticketTypeCounts, "CHILD");
 
     const totalPayment =
-      adultCount * TICKET_PRICES.ADULT + childCount * TICKET_PRICES.CHILD;
+      adultCount * ticketPrices.adult + childCount * ticketPrices.child;
 
     if (totalPayment === 0) {
-      throw new InvalidPurchaseException(ERROR_MESSAGES.NO_TICKETS_PROVIDED);
+      throw new InvalidPurchaseException(
+        "No tickets, provided. Please provide at least one ticket type request."
+      );
     }
 
     return totalPayment;
@@ -120,7 +113,9 @@ export default class TicketService {
     const totalReservedSeats = adultCount + childCount;
 
     if (totalReservedSeats === 0) {
-      throw new InvalidPurchaseException(ERROR_MESSAGES.NO_TICKETS_PROVIDED);
+      throw new InvalidPurchaseException(
+        "No tickets, provided. Please provide at least one ticket type request."
+      );
     }
 
     return totalReservedSeats;
