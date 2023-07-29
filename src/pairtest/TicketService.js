@@ -1,6 +1,7 @@
 import TicketTypeRequest from "./lib/TicketTypeRequest.js";
 import InvalidPurchaseException from "./lib/InvalidPurchaseException.js";
 import TicketPaymentService from "../thirdparty/paymentgateway/TicketPaymentService.js";
+import SeatReservationService from "../thirdparty/seatbooking/SeatReservationService.js";
 
 const ERROR_MESSAGES = {
   INVALID_ACCOUNT_ID:
@@ -105,7 +106,24 @@ export default class TicketService {
     const totalPayment =
       adultCount * TICKET_PRICES.ADULT + childCount * TICKET_PRICES.CHILD;
 
+    if (totalPayment === 0) {
+      throw new InvalidPurchaseException(ERROR_MESSAGES.NO_TICKETS_PROVIDED);
+    }
+
     return totalPayment;
+  }
+
+  #calculateReserveSeats(ticketTypeCounts) {
+    const adultCount = this.#getTicketTypeCount(ticketTypeCounts, "ADULT");
+    const childCount = this.#getTicketTypeCount(ticketTypeCounts, "CHILD");
+
+    const totalReservedSeats = adultCount + childCount;
+
+    if (totalReservedSeats === 0) {
+      throw new InvalidPurchaseException(ERROR_MESSAGES.NO_TICKETS_PROVIDED);
+    }
+
+    return totalReservedSeats;
   }
 
   /**
@@ -126,5 +144,10 @@ export default class TicketService {
 
     const ticketPaymentService = new TicketPaymentService();
     ticketPaymentService.makePayment(accountId, totalTicketCost);
+
+    const totalReserveSeats = this.#calculateReserveSeats(ticketTypeCounts);
+
+    const seatReservationService = new SeatReservationService();
+    seatReservationService.reserveSeat(accountId, totalReserveSeats);
   }
 }

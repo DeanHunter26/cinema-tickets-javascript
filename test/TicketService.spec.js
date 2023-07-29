@@ -1,8 +1,10 @@
 import TicketService from "../src/pairtest/TicketService";
 import TicketTypeRequest from "../src/pairtest/lib/TicketTypeRequest";
 import TicketPaymentService from "../src/thirdparty/paymentgateway/TicketPaymentService";
+import SeatReservationService from "../src/thirdparty/seatbooking/SeatReservationService";
 
 jest.mock("../src/thirdparty/paymentgateway/TicketPaymentService");
+jest.mock("../src/thirdparty/seatbooking/SeatReservationService");
 
 describe("TicketService", () => {
   let ticketService;
@@ -117,19 +119,68 @@ describe("TicketService", () => {
       });
     });
 
-    it("should call makePayment from TicketPaymentService with correct accountId and total ticket cost", () => {
-      const ticketTypeRequests = [
-        new TicketTypeRequest("ADULT", 2),
-        new TicketTypeRequest("CHILD", 3),
-        new TicketTypeRequest("INFANT", 1),
-      ];
+    describe("calculateTotalTicketCost", () => {
+      const NO_TICKETS_PROVIDED =
+        "No tickets, provided. Please provide at least one ticket type request.";
 
-      ticketService.purchaseTickets(123, ...ticketTypeRequests);
+      it("should call makePayment from TicketPaymentService with correct accountId and total ticket cost", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("ADULT", 2),
+          new TicketTypeRequest("CHILD", 3),
+          new TicketTypeRequest("INFANT", 1),
+        ];
 
-      const mockMakePayment =
-        TicketPaymentService.mock.instances[0].makePayment;
-      expect(mockMakePayment).toHaveBeenCalledTimes(1);
-      expect(mockMakePayment).toHaveBeenCalledWith(123, 70);
+        ticketService.purchaseTickets(123, ...ticketTypeRequests);
+
+        const mockMakePayment =
+          TicketPaymentService.mock.instances[0].makePayment;
+        expect(mockMakePayment).toHaveBeenCalledTimes(1);
+        expect(mockMakePayment).toHaveBeenCalledWith(123, 70);
+      });
+
+      it("should throw an error when there are no tickets", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("ADULT", 0),
+          new TicketTypeRequest("CHILD", 0),
+          new TicketTypeRequest("INFANT", 0),
+        ];
+
+        expect(() =>
+          ticketService.purchaseTickets(123, ...ticketTypeRequests)
+        ).toThrow(NO_TICKETS_PROVIDED);
+      });
+    });
+
+    describe("calculateReserveSeats", () => {
+      const NO_TICKETS_PROVIDED =
+        "No tickets, provided. Please provide at least one ticket type request.";
+
+      it("should call reserveSeat from SeatReservationService with correct accountId and total reserve seats", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("ADULT", 2),
+          new TicketTypeRequest("CHILD", 3),
+          new TicketTypeRequest("INFANT", 1),
+        ];
+
+        ticketService.purchaseTickets(123, ...ticketTypeRequests);
+
+        const mockReserveSeat =
+          SeatReservationService.mock.instances[0].reserveSeat;
+        expect(mockReserveSeat).toHaveBeenCalledTimes(1);
+        expect(mockReserveSeat).toHaveBeenCalledWith(123, 5);
+      });
+
+      it("should throw an error when there are no tickets", () => {
+        const ticketTypeRequests = [
+          new TicketTypeRequest("ADULT", 0),
+          new TicketTypeRequest("CHILD", 0),
+          new TicketTypeRequest("INFANT", 0),
+        ];
+
+        expect(() =>
+          ticketService.purchaseTickets(123, ...ticketTypeRequests)
+        ).toThrow(NO_TICKETS_PROVIDED);
+      });
     });
   });
 });
